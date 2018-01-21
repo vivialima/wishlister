@@ -1,103 +1,143 @@
 package br.com.vivia.wishlister.service;
 
 
+import java.awt.PageAttributes.MediaType;
+import java.io.IOException;
 import java.net.URI;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.context.annotation.Bean;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
+import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
+import br.com.vivia.wishlister.model.AccessToken;
+import br.com.vivia.wishlister.model.Recent;
+import br.com.vivia.wishlister.model.ResponseCheckins;
+import br.com.vivia.wishlister.model.User;
+import static br.com.vivia.wishlister.security.SecurityConfig.*;
 
-import br.com.vivia.wishlister.security.SecurityConfig;
 @Service
 public class AuthenticationService {
  
 	@Autowired
 	RestTemplate restTemplate;
+	Logger logger;
 	
 	@Bean
 	public RestTemplate restTemplate() {
 	    return new RestTemplate();
 	}
+	
 	/**
-	 * 
-	 * @return userCode for acess token
+	 * Calls /oauth2/authenticate and redirect to REDIRECT_URI/codeAuthentication
+	 * @return String uri
 	 */
-	public String login(){		
-	return "redirect:" +  UriComponentsBuilder.fromUriString(SecurityConfig.URL_AUTHENTICATE)
-				.queryParam("client_id", SecurityConfig.CLIENT_ID).queryParam("response_type", "code")
-				.queryParam("redirect_uri", SecurityConfig.REDIRECT_URI)
-				.build(false)
-				.toUriString();
-	}
-
-	/**
-	@Bean
-	public CommandLineRunner run(RestTemplate restTemplate) throws Exception {
-		return args -> {
-			
-			//Test api
-			String url = "https://api.foursquare.com/v2/venues/explore";
-			UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(url)
-					.queryParam("client_id", CLIENT_ID)
-					.queryParam("client_secret", CLIENT_SECRECT)
-					.queryParam("v", "20170801")
-					.queryParam("ll", "40.7243,-74.0018")
-					.queryParam("query", "coffee")
-					.queryParam("limit", "1");
-
-			System.out.println("GET " + builder.toUriString());
-			ResponseEntity<String> response = restTemplate.getForEntity(builder.toUriString(), String.class);
-			System.out.println("RESPONSE " + response.toString());
-
-			//Test Authenticate
-			String urlAuth = "https://foursquare.com/oauth2/authenticate";
-			UriComponentsBuilder builderAuthenticate = UriComponentsBuilder.fromUriString(urlAuth)
+	public String login() {
+		String uri = "";
+		try {
+			uri = "redirect:" + UriComponentsBuilder.fromUriString(URL_AUTHENTICATE)
 					.queryParam("client_id", CLIENT_ID).queryParam("response_type", "code")
-					.queryParam("redirect_uri", YOUR_REGISTERED_REDIRECT_URI);
-
-			System.out.println("URI AUTH " + builderAuthenticate.toUriString());
-			response = restTemplate.getForEntity(builder.toUriString(), String.class);
-			System.out.println("RESPONSE " + response.toString());
-
-			//Token
-			String urlAcessToken = "https://foursquare.com/oauth2/access_token";
-			
-			builderAuthenticate = UriComponentsBuilder
-					.fromUriString(urlAcessToken)
-					.queryParam("client_id", CLIENT_ID)
-					.queryParam("client_secret", CLIENT_SECRECT)
-					.queryParam("grant_type", "authorization_code")
-					.queryParam("redirect_uri", YOUR_REGISTERED_REDIRECT_URI)
-					.queryParam("code", CODE_AUTH)
-					;
-			
-			System.out.println("GET urlAcessToken " + builderAuthenticate.build(false));
-			
-			response = restTemplate.getForEntity(builderAuthenticate.build(false).toUriString(), String.class);
-			System.out.println("RESPONSE " + response.toString());
-			
-			AccessToken accessToken =
-					restTemplate.getForObject(builderAuthenticate.build(false).toUriString(), AccessToken.class);
-			System.out.println(accessToken.toString());
-			
-			
-			//Test GET Checkins
-			String user = "self";
-			String urlCheckin = "https://api.foursquare.com/v2/users/"+user+"/checkins";
-			builderAuthenticate = UriComponentsBuilder.fromUriString(urlCheckin)
-					.queryParam("oauth_token", accessToken.getAccess_token())
-					.queryParam("v",VERSIONING_DATE);
-
-			System.out.println("GET urlAcessToken " + builderAuthenticate.build(false));
-			response = restTemplate.getForEntity(builderAuthenticate.build(false).toUriString(), String.class);
-
-		};
+					.queryParam("redirect_uri", REDIRECT_URI).build(false).toUriString();
+		} catch (Exception e) {
+			logger.log(Level.SEVERE,this.getClass().getName()+" [login]", e.getMessage());
+		}
+		return uri;
 	}
-	**/
+	
+	/**
+	 * @param codeAuthentication
+	 * @return String accessToken
+	 */
+	public String getAcessToken(String codeAuthentication){
+		String token = "";
+		try{
+		AccessToken accessToken =
+		restTemplate.getForObject(
+				UriComponentsBuilder
+				.fromUriString(URL_ACESS_TOKEN)
+				.queryParam("client_id", CLIENT_ID)
+				.queryParam("client_secret", CLIENT_SECRECT)
+				.queryParam("grant_type", "authorization_code")
+				.queryParam("redirect_uri", REDIRECT_URI)
+				.queryParam("code", codeAuthentication)
+				.build(false)
+				.toString()
+		,AccessToken.class);
+		token = accessToken.getAccess_token();
+		}catch (Exception e) {
+			logger.log(Level.SEVERE,this.getClass().getName()+" [login]", e.getMessage());
+		}
+		return token;
+	}
+	
+	public User getDetailsOfUser(String accessToken, String userId){
+		String urlCheckin = "https://api.foursquare.com/v2/users/"+userId;
+		User self = 
+				restTemplate.getForObject(
+				UriComponentsBuilder.fromUriString(urlCheckin)
+				.queryParam("oauth_token", accessToken)
+				.queryParam("v", VERSIONING_DATE)
+				.build(false)
+				.toUriString(), 
+		User.class);
+		System.out.println("self "+self.toString());
+		return self;
+	}
+	
+	public List<Recent> getRecentsCheckins(String accessToken){
+		List<Recent> recentsCheckins = new ArrayList<>();
+		String urlCheckin = "https://api.foursquare.com/v2/checkins/recent/";
+		try {
+			System.out.println("-----recents");
+			String uri = UriComponentsBuilder
+					.fromUriString(urlCheckin)
+					.queryParam("limit", "20")
+					.queryParam("afterTimestamp", "123456")
+					.queryParam("oauth_token", accessToken).
+					queryParam("v", VERSIONING_DATE).
+					build(false).
+					toUriString();
+			System.out.println(uri);
+			ResponseEntity<ResponseCheckins> responseEntity = 
+					restTemplate.exchange(uri, HttpMethod.GET, null,
+					new ParameterizedTypeReference<ResponseCheckins>() {
+					});
+			
+			if (responseEntity.hasBody() && responseEntity.getBody().getResponse() != null
+					&& responseEntity.getBody().getResponse().getRecent()!=null) {
+				recentsCheckins = responseEntity.getBody().getResponse().getRecent();
+				System.out.println("recents size "+recentsCheckins.size());
+			}
+		} catch (Exception e) {
+			logger.log(Level.SEVERE,this.getClass().getName()+" [getRecentsCheckins]", e.getMessage());
+		}
+		return recentsCheckins;
+	}
+	
+
+//	public String getVenues(String accessToken){
+//		GET https://api.foursquare.com/v2/venues/VENUE_ID/photos
+//			String urlCheckin = "https://api.foursquare.com/v2/users/"+userId;
+//		User self = 
+//				restTemplate.getForObject(
+//				UriComponentsBuilder.fromUriString(urlCheckin)
+//				.queryParam("oauth_token", accessToken)
+//				.queryParam("v", VERSIONING_DATE)
+//				.build(false)
+//				.toUriString(), 
+//		User.class);
+//		System.out.println("self "+self.toString());
+//
+//		return "";
+//	}
 }
