@@ -21,9 +21,4 @@ public class WishlisterApplicationTests {
 		assertThat(restTemplate).isNotNull();
 	}
 	
-	//TODO test
-	@Test
-	public void testGet() {
-		assertThat(restTemplate).isNotNull();
-	}
 }
