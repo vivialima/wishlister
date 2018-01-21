@@ -22,7 +22,7 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 import br.com.vivia.wishlister.model.AccessToken;
 import br.com.vivia.wishlister.model.Recent;
-import br.com.vivia.wishlister.model.ResponseCheckins;
+import br.com.vivia.wishlister.model.ResponseBody;
 import br.com.vivia.wishlister.model.User;
 import static br.com.vivia.wishlister.security.SecurityConfig.*;
 
@@ -79,65 +79,4 @@ public class AuthenticationService {
 		}
 		return token;
 	}
-	
-	public User getDetailsOfUser(String accessToken, String userId){
-		String urlCheckin = "https://api.foursquare.com/v2/users/"+userId;
-		User self = 
-				restTemplate.getForObject(
-				UriComponentsBuilder.fromUriString(urlCheckin)
-				.queryParam("oauth_token", accessToken)
-				.queryParam("v", VERSIONING_DATE)
-				.build(false)
-				.toUriString(), 
-		User.class);
-		System.out.println("self "+self.toString());
-		return self;
-	}
-	
-	public List<Recent> getRecentsCheckins(String accessToken){
-		List<Recent> recentsCheckins = new ArrayList<>();
-		String urlCheckin = "https://api.foursquare.com/v2/checkins/recent/";
-		try {
-			System.out.println("-----recents");
-			String uri = UriComponentsBuilder
-					.fromUriString(urlCheckin)
-					.queryParam("limit", "20")
-					.queryParam("afterTimestamp", "123456")
-					.queryParam("oauth_token", accessToken).
-					queryParam("v", VERSIONING_DATE).
-					build(false).
-					toUriString();
-			System.out.println(uri);
-			ResponseEntity<ResponseCheckins> responseEntity = 
-					restTemplate.exchange(uri, HttpMethod.GET, null,
-					new ParameterizedTypeReference<ResponseCheckins>() {
-					});
-			
-			if (responseEntity.hasBody() && responseEntity.getBody().getResponse() != null
-					&& responseEntity.getBody().getResponse().getRecent()!=null) {
-				recentsCheckins = responseEntity.getBody().getResponse().getRecent();
-				System.out.println("recents size "+recentsCheckins.size());
-			}
-		} catch (Exception e) {
-			logger.log(Level.SEVERE,this.getClass().getName()+" [getRecentsCheckins]", e.getMessage());
-		}
-		return recentsCheckins;
-	}
-	
-
-//	public String getVenues(String accessToken){
-//		GET https://api.foursquare.com/v2/venues/VENUE_ID/photos
-//			String urlCheckin = "https://api.foursquare.com/v2/users/"+userId;
-//		User self = 
-//				restTemplate.getForObject(
-//				UriComponentsBuilder.fromUriString(urlCheckin)
-//				.queryParam("oauth_token", accessToken)
-//				.queryParam("v", VERSIONING_DATE)
-//				.build(false)
-//				.toUriString(), 
-//		User.class);
-//		System.out.println("self "+self.toString());
-//
-//		return "";
-//	}
 }

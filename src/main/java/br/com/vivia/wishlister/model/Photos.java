@@ -7,7 +7,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 public class Photos {
 	private String count; 
-    //private List<String> items; 
+    private List<Items> items; 
 
 	public String getCount() {
 		return count;
@@ -15,5 +15,13 @@ public class Photos {
 
 	public void setCount(String count) {
 		this.count = count;
+	}
+
+	public List<Items> getItems() {
+		return items;
+	}
+
+	public void setItems(List<Items> items) {
+		this.items = items;
 	}
 }

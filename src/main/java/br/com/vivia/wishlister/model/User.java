@@ -33,8 +33,13 @@ public class User {
 	public void setPhoto(Photo photo) {
 		this.photo = photo;
 	}
-	@Override
-	public String toString() {
-		return super.toString();
+	public String getUriPhotoUser(){
+		String size="36x36";
+		String uri = "";
+		if (getPhoto()!=null) {
+			System.out.println(getPhoto().getPrefix());
+			uri = getPhoto().getPrefix()+size+getPhoto().getSuffix();
+		}
+		return uri;
 	}
 }

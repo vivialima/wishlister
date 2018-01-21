@@ -10,7 +10,7 @@ import br.com.vivia.wishlister.service.AuthenticationService;
 @Controller
 public class LoginController {
 	@Autowired
-    private AuthenticationService foursquare;
+    private AuthenticationService authenticationService;
 	
 	@RequestMapping("/")
 	public String login(){
@@ -26,7 +26,7 @@ public class LoginController {
 	
 	@RequestMapping("/redirect")
 	public String redirectFoursquareLogin(){
-		return foursquare.login();
+		return authenticationService.login();
 	}
 
 	

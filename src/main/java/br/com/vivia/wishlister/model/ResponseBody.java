@@ -5,7 +5,7 @@ import java.util.List;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 @JsonIgnoreProperties(ignoreUnknown = true)
 
-public class ResponseCheckins {
+public class ResponseBody {
  private Response response;
 
 public Response getResponse() {
