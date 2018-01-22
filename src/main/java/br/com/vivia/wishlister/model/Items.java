@@ -1,18 +1,21 @@
 package br.com.vivia.wishlister.model;
 
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.OneToMany;
+
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-
+@Entity
 @JsonIgnoreProperties(ignoreUnknown = true)
-
 public class Items {
+	@Id
 	private String id;
 	private String createdAt;
 	private String prefix;
-	private String sufix;
+	private String suffix;
 	private String width;
 	private String height;
-	private User user;
-	private String visibility;
+	
 	public String getId() {
 		return id;
 	}
@@ -31,11 +34,11 @@ public class Items {
 	public void setPrefix(String prefix) {
 		this.prefix = prefix;
 	}
-	public String getSufix() {
-		return sufix;
+	public String getSuffix() {
+		return suffix;
 	}
-	public void setSufix(String sufix) {
-		this.sufix = sufix;
+	public void setSuffix(String suffix) {
+		this.suffix = suffix;
 	}
 	public String getWidth() {
 		return width;
@@ -49,17 +52,8 @@ public class Items {
 	public void setHeight(String height) {
 		this.height = height;
 	}
-	public User getUser() {
-		return user;
-	}
-	public void setUser(User user) {
-		this.user = user;
-	}
-	public String getVisibility() {
-		return visibility;
-	}
-	public void setVisibility(String visibility) {
-		this.visibility = visibility;
+	public String getUri(){
+		return getPrefix()+"300x300"+getSuffix();
 	}
 	
 }

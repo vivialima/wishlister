@@ -3,14 +3,12 @@ package br.com.vivia.wishlister.model;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-
 public class Recent  {
 	private String id;
 	private String createdAt;
     private String type;
     private String timeZoneOffset;
     private Venue venue;
-    private Photos photos;
     private User user;
     
 	public User getUser() {
@@ -48,11 +46,5 @@ public class Recent  {
 	}
 	public void setVenue(Venue venue) {
 		this.venue = venue;
-	}
-	public Photos getPhotos() {
-		return photos;
-	}
-	public void setPhotos(Photos photos) {
-		this.photos = photos;
 	}
 }

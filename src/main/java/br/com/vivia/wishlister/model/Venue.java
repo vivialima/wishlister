@@ -1,12 +1,24 @@
 package br.com.vivia.wishlister.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import javax.persistence.Embeddable;
+import javax.persistence.Embedded;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+@Embeddable
 @JsonIgnoreProperties
 public class Venue {
 	private String id;
 	private String name;
+	@Embedded
 	private Location location;
+	private String photo;
+	
+	public String getPhoto() {
+		return photo;
+	}
+	public void setPhoto(String photo) {
+		this.photo = photo;
+	}
 	public String getId() {
 		return id;
 	}

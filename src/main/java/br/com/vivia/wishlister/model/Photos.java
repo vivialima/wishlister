@@ -4,11 +4,11 @@ import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 @JsonIgnoreProperties(ignoreUnknown = true)
-
 public class Photos {
+	
 	private String count; 
-    private List<Items> items; 
-
+	private List<Items> items; 
+    
 	public String getCount() {
 		return count;
 	}
@@ -23,5 +23,12 @@ public class Photos {
 
 	public void setItems(List<Items> items) {
 		this.items = items;
+	}
+	public Items getFirstItem(){
+		System.out.println("Items "+items);
+		if (items!=null) {
+			return items.get(0);
+		}
+		return null;
 	}
 }
