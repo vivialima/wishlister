@@ -18,6 +18,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import br.com.vivia.wishlister.model.Photos;
 import br.com.vivia.wishlister.model.Recent;
+import br.com.vivia.wishlister.model.RecentCheckin;
 import br.com.vivia.wishlister.model.ResponseBody;
 import br.com.vivia.wishlister.model.User;
 
@@ -51,7 +52,7 @@ public class WishlisterService {
 	}
 	
 	public List<Recent> getRecentsCheckins(String accessToken){
-		List<Recent> recentsCheckins = new ArrayList<>();
+		List<Recent> recents = new ArrayList<>();
 		String urlCheckin = "https://api.foursquare.com/v2/checkins/recent/";
 		try {
 			System.out.println("-----recents");
@@ -64,6 +65,7 @@ public class WishlisterService {
 					build(false).
 					toUriString();
 			System.out.println(uri);
+			
 			ResponseEntity<ResponseBody> responseEntity = 
 					restTemplate.exchange(uri, HttpMethod.GET, null,
 					new ParameterizedTypeReference<ResponseBody>() {
@@ -71,19 +73,31 @@ public class WishlisterService {
 			
 			if (responseEntity.hasBody() && responseEntity.getBody().getResponse() != null
 					&& responseEntity.getBody().getResponse().getRecent()!=null) {
-				recentsCheckins = responseEntity.getBody().getResponse().getRecent();
-				System.out.println("recents size "+recentsCheckins.size());
+				recents = responseEntity.getBody().getResponse().getRecent();
 			}
+			addVenuePhotoToRecents(accessToken,recents);
+			
 		} catch (Exception e) {
 			logger.log(Level.SEVERE,this.getClass().getName()+" [getRecentsCheckins]", e.getMessage());
 		}
-		return recentsCheckins;
+		return recents;
 	}
 	
-
-	public String getVenuesPhotos(String accessToken, String venueId){
+	public void addVenuePhotoToRecents(String accessToken, List<Recent> recentsCheckins){
+		try {
+		   Photos photos = null;
+		   for (Recent recent : recentsCheckins) {
+			 photos = getVenuesPhotos(accessToken,recent.getVenue().getId());
+			 recent.getVenue().setPhoto(photos.getFirstItem().getUri());
+		   }
+		} catch (Exception e) {
+			logger.log(Level.SEVERE,this.getClass().getName()+" [addVenuePhotoToRecents]", e.getMessage());
+		}
+	}
+	
+	public Photos getVenuesPhotos(String accessToken, String venueId){
 	    String urlCheckin = "https://api.foursquare.com/v2/venues/"+venueId+"/photos";
-		Photos venuePhotos;
+		Photos venuePhotos = null;
 		try {
 			System.out.println("-----getVenuesPhotos");
 			String uri = 
@@ -104,11 +118,10 @@ public class WishlisterService {
 			if (responseEntity.hasBody() && responseEntity.getBody().getResponse() != null
 					&& responseEntity.getBody().getResponse().getPhotos()!=null) {
 				venuePhotos = responseEntity.getBody().getResponse().getPhotos();
-				System.out.println("venuePhotos size "+venuePhotos.getCount()+" items "+venuePhotos.getItems().get(0).getUser().getFirstName());
 			}
 		} catch (Exception e) {
 			logger.log(Level.SEVERE,this.getClass().getName()+" [getVenuesPhotos]", e.getMessage());
 		}
-		return "";
+		return venuePhotos;
 	}
 }
