@@ -21,23 +21,44 @@
       </div>
     </header>
 	<div class="container">
-	     <div id="wishlist" class="album py-5 bg-light"><h1>Wishlist</h1></div>
+	     <div id="wishlist" class="album py-5 bg-light"><h1>Wishlist</h1>
+	     <table class="table table-hover">
+				<thead>
+					<tr>
+						<th>Nome</th>
+					</tr>
+				</thead>
+				<tr th:each="recent : ${wishlist}">
+					<td><span th:text="${recent.id}"></span></td>
+					<td><img th:src="${recent.user.uriPhotoUser}"></img></td>
+				    <td><img th:src="${recent.uriVenuePhoto}"></img></td>	
+				    <td><img th:src="${recent.venueName}"></img></td>		
+				    <td><button type="submit" class="btn-success">Add</button></td>				    		    
+				</tr>
+			</table>
+	     </div>
 		<div class="album py-5 bg-light" id="recents">
 		<h1>Recents</h1>
         <div class="container">
+      <form action="#" th:action="@{/add/recent}" method="post">
          <table class="table table-hover">
 				<thead>
 					<tr>
 						<th>Nome</th>
 					</tr>
 				</thead>
-				<tr th:each="recent : ${recents}">
-					<td><span th:text="${recent.id}"></span></td>
+			    <tr th:each="recent : ${recents}">
+					<td><input th:text="${recent.id}" type="text"  id="recentId" name="recentId"></input></td>
 					<td><img th:src="${recent.user.uriPhotoUser}"></img></td>
+				    <td><img th:src="${recent.venue.photo}"></img></td>		
+				    <td>
+s				    <button type="submit" class="btn-success" name="add" >Add</button>
+				    </td>
 				</tr>
-
+				
 			</table>
-        
+			
+			</form>
           <div class="row">
             <div class="col-md-4">
               <div class="card mb-4 box-shadow">
