@@ -4,12 +4,10 @@ import javax.persistence.Embeddable;
 import javax.persistence.Embedded;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-@Embeddable
 @JsonIgnoreProperties
 public class Venue {
 	private String id;
 	private String name;
-	@Embedded
 	private Location location;
 	private String photo;
 	

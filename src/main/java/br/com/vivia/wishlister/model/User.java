@@ -43,7 +43,7 @@ public class User {
 		this.photo = photo;
 	}
 	public String getUriPhotoUser(){
-		String size="36x36";
+		String size="100x100";
 		String uri = "";
 		if (getPhoto()!=null) {
 			System.out.println(getPhoto().getPrefix());
