@@ -25,7 +25,6 @@ public class Photos {
 		this.items = items;
 	}
 	public Items getFirstItem(){
-		System.out.println("Items "+items);
 		if (items!=null) {
 			return items.get(0);
 		}

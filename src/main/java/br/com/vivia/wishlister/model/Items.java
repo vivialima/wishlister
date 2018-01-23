@@ -1,14 +1,7 @@
 package br.com.vivia.wishlister.model;
-
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.OneToMany;
-
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-@Entity
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class Items {
-	@Id
 	private String id;
 	private String createdAt;
 	private String prefix;

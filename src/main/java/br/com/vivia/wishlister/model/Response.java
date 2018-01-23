@@ -3,14 +3,15 @@ package br.com.vivia.wishlister.model;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 @JsonIgnoreProperties(ignoreUnknown = true)
 
 public class Response {
 
 	private List<Recent> recent;
-    private Photos photos;
-    private User user;
-	
+	private Photos photos;
+	private User user;
+
 	public User getUser() {
 		return user;
 	}

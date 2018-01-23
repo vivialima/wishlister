@@ -1,8 +1,5 @@
 package br.com.vivia.wishlister.model;
 
-import javax.persistence.Embeddable;
-import javax.persistence.Embedded;
-
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 @JsonIgnoreProperties
 public class Venue {

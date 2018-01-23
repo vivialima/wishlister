@@ -1,10 +1,7 @@
 package br.com.vivia.wishlister.model;
 
-import javax.persistence.Embeddable;
-
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 @JsonIgnoreProperties(ignoreUnknown = true)
-@Embeddable
 public class Photo {
 	private String prefix;
     private String suffix;

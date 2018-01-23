@@ -1,21 +1,12 @@
 package br.com.vivia.wishlister.model;
 
-import javax.persistence.Embeddable;
-import javax.persistence.Embedded;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-@Entity(name="user")
-@Embeddable
 public class User {
-	@Id
 	private String id;
 	private String firstName;
     private String lastName;
-    @Embedded
     private Photo photo;
     
 	public String getId() {

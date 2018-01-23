@@ -2,10 +2,6 @@ package br.com.vivia.wishlister.model;
 
 import java.util.List;
 
-import javax.persistence.Embeddable;
-
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-
 public class Location {
 	private String lng;
 	private String cc;
@@ -55,12 +51,12 @@ public class Location {
 
 	private String lat;
 
-//	public List<String> getFormattedAddress() {
-//		return formattedAddress;
-//	}
-//
-//	public void setFormattedAddress(List<String> formattedAddress) {
-//		this.formattedAddress = formattedAddress;
-//	}
+	public List<String> getFormattedAddress() {
+		return formattedAddress;
+	}
+
+	public void setFormattedAddress(List<String> formattedAddress) {
+		this.formattedAddress = formattedAddress;
+	}
 
 }

@@ -28,21 +28,20 @@ public class WishlisterService {
 	@Autowired
 	RestTemplate restTemplate;
 	Logger logger;
-	
+
 	@Autowired
 	private HttpSession httpSession;
-	
 
 	@SuppressWarnings("unchecked")
-	public List<Recent> getWishlist(){
-		List<Recent> wishlist =  (List<Recent>) httpSession.getAttribute("wishlist");
-		if (wishlist!=null) {
+	public List<Recent> getWishlist() {
+		List<Recent> wishlist = (List<Recent>) httpSession.getAttribute("wishlist");
+		if (wishlist != null) {
 			return wishlist;
 		}
 		return new ArrayList<Recent>();
 	}
-	
-	public List<Recent> addWishlist(String recentId){
+
+	public List<Recent> addWishlist(String recentId) {
 		Recent recent = findById(recentId, getRecents());
 		List<Recent> updatedList = getWishlist();
 		updatedList.add(recent);
@@ -51,8 +50,8 @@ public class WishlisterService {
 		removeRecent(recent);
 		return updatedList;
 	}
-	
-	public List<Recent> removeWishlist(String recentId){
+
+	public List<Recent> removeWishlist(String recentId) {
 		Recent recent = findById(recentId, getWishlist());
 		List<Recent> updatedList = getWishlist();
 		updatedList.remove(recent);
@@ -61,139 +60,115 @@ public class WishlisterService {
 		addRecent(recent);
 		return updatedList;
 	}
-	
-	public void addRecent(Recent recent){
+
+	public void addRecent(Recent recent) {
 		List<Recent> recents = getRecents();
-        recents.add(recent);
-        httpSession.removeAttribute("recents");
-        httpSession.setAttribute("recents", recents);
+		recents.add(recent);
+		httpSession.removeAttribute("recents");
+		httpSession.setAttribute("recents", recents);
 	}
-	
+
 	@SuppressWarnings("unchecked")
-	public List<Recent> getRecents(){
+	public List<Recent> getRecents() {
 		List<Recent> recents = (List<Recent>) httpSession.getAttribute("recents");
-		if (recents!=null) {
+		if (recents != null) {
 			return recents;
 		}
 		return new ArrayList<Recent>();
 	}
-	
-	public void removeRecent(Recent recent){
+
+	public void removeRecent(Recent recent) {
 		List<Recent> recents = getRecents();
-        recents.remove(recent);
-        httpSession.removeAttribute("recents");
-        httpSession.setAttribute("recents", recents);
+		recents.remove(recent);
+		httpSession.removeAttribute("recents");
+		httpSession.setAttribute("recents", recents);
 	}
-	
-	public List<Recent> getRecentsCheckinsFriends(String acessToken){
-		if (getRecents()==null || (getRecents().isEmpty() && getWishlist().isEmpty())) {
-			List<Recent> recents =	getRecentsCheckins(acessToken);
+
+	public List<Recent> getRecentsCheckinsFriends(String acessToken) {
+		if (getRecents() == null || (getRecents().isEmpty() && getWishlist().isEmpty())) {
+			List<Recent> recents = getRecentsCheckins(acessToken);
 			httpSession.setAttribute("recents", recents);
 		}
-		
+
 		return getRecents();
 	}
-	
-	public Recent findById(String recentId, List<Recent> list){
-		return list.stream()
-				.filter(recent -> recent.getId().equals(recentId))
-				.findFirst().get();
+
+	public Recent findById(String recentId, List<Recent> list) {
+		return list.stream().filter(recent -> recent.getId().equals(recentId)).findFirst().get();
 	}
-	
-	
-	public User getDetailsUser(String accessToken, String userId){
-        System.out.println("getDetailUser");
-		String uriUser = "https://api.foursquare.com/v2/users/"+userId;
+
+	public User getDetailsUser(String accessToken, String userId) {
+		String uriUser = "https://api.foursquare.com/v2/users/" + userId;
 		User user = null;
 		try {
-			ResponseBody response = 
-					restTemplate.getForObject(
-					UriComponentsBuilder.fromUriString(uriUser)
-					.queryParam("oauth_token", accessToken)
-					.queryParam("v", VERSIONING_DATE)
-					.build(false)
-					.toUriString(), 
+			ResponseBody response = restTemplate.getForObject(UriComponentsBuilder.fromUriString(uriUser)
+					.queryParam("oauth_token", accessToken).queryParam("v", VERSIONING_DATE).build(false).toUriString(),
 					ResponseBody.class);
-			
-			if (response!=null && response.getResponse() != null ) {
-				user =response.getResponse().getUser();
+
+			if (response != null && response.getResponse() != null) {
+				user = response.getResponse().getUser();
 			}
 		} catch (Exception e) {
-			logger.log(Level.SEVERE,this.getClass().getName()+" [getDetailsUser]", e.getMessage());
+			logger.log(Level.SEVERE, this.getClass().getName() + " [getDetailsUser]", e.getMessage());
 		}
 		return user;
 	}
 
-	
-	public List<Recent> getRecentsCheckins(String accessToken){
-        System.out.println("getRecentsCheckins");
+	public List<Recent> getRecentsCheckins(String accessToken) {
 		List<Recent> recents = new ArrayList<>();
 		String urlCheckin = "https://api.foursquare.com/v2/checkins/recent/";
 		try {
-			String uri = UriComponentsBuilder
-					.fromUriString(urlCheckin)
-					.queryParam("limit", "20")
-					.queryParam("afterTimestamp", "123456")
-					.queryParam("oauth_token", accessToken).
-					queryParam("v", VERSIONING_DATE).
-					build(false).
-					toUriString();
+			String uri = UriComponentsBuilder.fromUriString(urlCheckin).queryParam("limit", "20")
+					.queryParam("afterTimestamp", "123456").queryParam("oauth_token", accessToken)
+					.queryParam("v", VERSIONING_DATE).build(false).toUriString();
 			System.out.println(uri);
-			
-			ResponseEntity<ResponseBody> responseEntity = 
-					restTemplate.exchange(uri, HttpMethod.GET, null,
+
+			ResponseEntity<ResponseBody> responseEntity = restTemplate.exchange(uri, HttpMethod.GET, null,
 					new ParameterizedTypeReference<ResponseBody>() {
 					});
-			
+
 			if (responseEntity.hasBody() && responseEntity.getBody().getResponse() != null
-					&& responseEntity.getBody().getResponse().getRecent()!=null) {
+					&& responseEntity.getBody().getResponse().getRecent() != null) {
 				recents = responseEntity.getBody().getResponse().getRecent();
 			}
-			addVenuePhotoToRecents(accessToken,recents);
-			
+			addVenuePhotoToRecents(accessToken, recents);
+
 		} catch (Exception e) {
-			logger.log(Level.SEVERE,this.getClass().getName()+" [getRecentsCheckins]", e.getMessage());
+			logger.log(Level.SEVERE, this.getClass().getName() + " [getRecentsCheckins]", e.getMessage());
 		}
 		return recents;
 	}
-	
-	public void addVenuePhotoToRecents(String accessToken, List<Recent> recentsCheckins){
+
+	public void addVenuePhotoToRecents(String accessToken, List<Recent> recentsCheckins) {
 		try {
-		   Photos photos = null;
-		   for (Recent recent : recentsCheckins) {
-			 photos = getVenuesPhotos(accessToken,recent.getVenue().getId());
-			 recent.getVenue().setPhoto(photos.getFirstItem().getUri());
-		   }
+			Photos photos = null;
+			for (Recent recent : recentsCheckins) {
+				photos = getVenuesPhotos(accessToken, recent.getVenue().getId());
+				recent.getVenue().setPhoto(photos.getFirstItem().getUri());
+			}
 		} catch (Exception e) {
-			logger.log(Level.SEVERE,this.getClass().getName()+" [addVenuePhotoToRecents]", e.getMessage());
+			logger.log(Level.SEVERE, this.getClass().getName() + " [addVenuePhotoToRecents]", e.getMessage());
 		}
 	}
-	
-	public Photos getVenuesPhotos(String accessToken, String venueId){
-	    String urlCheckin = "https://api.foursquare.com/v2/venues/"+venueId+"/photos";
+
+	public Photos getVenuesPhotos(String accessToken, String venueId) {
+		String urlCheckin = "https://api.foursquare.com/v2/venues/" + venueId + "/photos";
 		Photos venuePhotos = null;
 		try {
-			String uri = 
-					UriComponentsBuilder.fromUriString(urlCheckin)
-					.queryParam("group", "venue")
-					.queryParam("ofset", 100)
-					.queryParam("limit", 100)
-					.queryParam("oauth_token", accessToken)
-					.queryParam("v", VERSIONING_DATE)
-					.build(false)
-					.toUriString();
-			System.out.println("uri "+uri);
-			ResponseEntity<ResponseBody> responseEntity = 
-					restTemplate.exchange(uri, HttpMethod.GET, null,
+			String uri = UriComponentsBuilder.fromUriString(urlCheckin).queryParam("group", "venue")
+					.queryParam("ofset", 100).queryParam("limit", 100).queryParam("oauth_token", accessToken)
+					.queryParam("v", VERSIONING_DATE).build(false).toUriString();
+			System.out.println("uri " + uri);
+			ResponseEntity<ResponseBody> responseEntity = restTemplate.exchange(uri, HttpMethod.GET, null,
 					new ParameterizedTypeReference<ResponseBody>() {
 					});
-			
+
 			if (responseEntity.hasBody() && responseEntity.getBody().getResponse() != null
-					&& responseEntity.getBody().getResponse().getPhotos()!=null) {
+					&& responseEntity.getBody().getResponse().getPhotos() != null) {
 				venuePhotos = responseEntity.getBody().getResponse().getPhotos();
 			}
 		} catch (Exception e) {
-			logger.log(Level.SEVERE,this.getClass().getName()+" [getVenuesPhotos]", e.getMessage());
+			logger.log(Level.SEVERE, this.getClass().getName() + " [getVenuesPhotos]", e.getMessage());
 		}
 		return venuePhotos;
 	}
