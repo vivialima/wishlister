@@ -10,7 +10,6 @@ import java.util.logging.Logger;
 import javax.servlet.http.HttpSession;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Bean;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
@@ -20,7 +19,6 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import br.com.vivia.wishlister.model.Photos;
 import br.com.vivia.wishlister.model.Recent;
-import br.com.vivia.wishlister.model.RecentCheckin;
 import br.com.vivia.wishlister.model.ResponseBody;
 import br.com.vivia.wishlister.model.User;
 
@@ -37,12 +35,15 @@ public class WishlisterService {
 
 	@SuppressWarnings("unchecked")
 	public List<Recent> getWishlist(){
-		List<Recent> wishlist = (List<Recent>) httpSession.getAttribute("wishlist");
-		return wishlist;
+		List<Recent> wishlist =  (List<Recent>) httpSession.getAttribute("wishlist");
+		if (wishlist!=null) {
+			return wishlist;
+		}
+		return new ArrayList<Recent>();
 	}
 	
 	public List<Recent> addWishlist(String recentId){
-		Recent recent = findById(recentId);
+		Recent recent = findById(recentId, getRecents());
 		List<Recent> updatedList = getWishlist();
 		updatedList.add(recent);
 		httpSession.removeAttribute("wishlist");
@@ -52,7 +53,7 @@ public class WishlisterService {
 	}
 	
 	public List<Recent> removeWishlist(String recentId){
-		Recent recent = findById(recentId);
+		Recent recent = findById(recentId, getWishlist());
 		List<Recent> updatedList = getWishlist();
 		updatedList.remove(recent);
 		httpSession.removeAttribute("wishlist");
@@ -71,7 +72,10 @@ public class WishlisterService {
 	@SuppressWarnings("unchecked")
 	public List<Recent> getRecents(){
 		List<Recent> recents = (List<Recent>) httpSession.getAttribute("recents");
-		return recents;
+		if (recents!=null) {
+			return recents;
+		}
+		return new ArrayList<Recent>();
 	}
 	
 	public void removeRecent(Recent recent){
@@ -90,14 +94,15 @@ public class WishlisterService {
 		return recents;
 	}
 	
-	public Recent findById(String recentId){
-		return getRecents().stream()
+	public Recent findById(String recentId, List<Recent> list){
+		return list.stream()
 				.filter(recent -> recent.getId().equals(recentId))
 				.findFirst().get();
 	}
 	
 	
 	public User getDetailsUser(String accessToken, String userId){
+        System.out.println("getDetailUser");
 		String uriUser = "https://api.foursquare.com/v2/users/"+userId;
 		User user = null;
 		try {
@@ -121,10 +126,10 @@ public class WishlisterService {
 
 	
 	public List<Recent> getRecentsCheckins(String accessToken){
+        System.out.println("getRecentsCheckins");
 		List<Recent> recents = new ArrayList<>();
 		String urlCheckin = "https://api.foursquare.com/v2/checkins/recent/";
 		try {
-			System.out.println("-----recents");
 			String uri = UriComponentsBuilder
 					.fromUriString(urlCheckin)
 					.queryParam("limit", "20")
@@ -168,7 +173,6 @@ public class WishlisterService {
 	    String urlCheckin = "https://api.foursquare.com/v2/venues/"+venueId+"/photos";
 		Photos venuePhotos = null;
 		try {
-			System.out.println("-----getVenuesPhotos");
 			String uri = 
 					UriComponentsBuilder.fromUriString(urlCheckin)
 					.queryParam("group", "venue")
