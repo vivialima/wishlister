@@ -86,12 +86,12 @@ public class WishlisterService {
 	}
 	
 	public List<Recent> getRecentsCheckinsFriends(String acessToken){
-		if (getRecents()!=null && !getRecents().isEmpty()) {
-			return getRecents();
+		if (getRecents()==null || (getRecents().isEmpty() && getWishlist().isEmpty())) {
+			List<Recent> recents =	getRecentsCheckins(acessToken);
+			httpSession.setAttribute("recents", recents);
 		}
-		List<Recent> recents =	getRecentsCheckins(acessToken);
-		httpSession.setAttribute("recents", recents);
-		return recents;
+		
+		return getRecents();
 	}
 	
 	public Recent findById(String recentId, List<Recent> list){
