@@ -7,6 +7,8 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import javax.servlet.http.HttpSession;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.core.ParameterizedTypeReference;
@@ -29,6 +31,72 @@ public class WishlisterService {
 	RestTemplate restTemplate;
 	Logger logger;
 	
+	@Autowired
+	private HttpSession httpSession;
+	
+
+	@SuppressWarnings("unchecked")
+	public List<Recent> getWishlist(){
+		List<Recent> wishlist = (List<Recent>) httpSession.getAttribute("wishlist");
+		return wishlist;
+	}
+	
+	public List<Recent> addWishlist(String recentId){
+		Recent recent = findById(recentId);
+		List<Recent> updatedList = getWishlist();
+		updatedList.add(recent);
+		httpSession.removeAttribute("wishlist");
+		httpSession.setAttribute("wishlist", updatedList);
+		removeRecent(recent);
+		return updatedList;
+	}
+	
+	public List<Recent> removeWishlist(String recentId){
+		Recent recent = findById(recentId);
+		List<Recent> updatedList = getWishlist();
+		updatedList.remove(recent);
+		httpSession.removeAttribute("wishlist");
+		httpSession.setAttribute("wishlist", updatedList);
+		addRecent(recent);
+		return updatedList;
+	}
+	
+	public void addRecent(Recent recent){
+		List<Recent> recents = getRecents();
+        recents.add(recent);
+        httpSession.removeAttribute("recents");
+        httpSession.setAttribute("recents", recents);
+	}
+	
+	@SuppressWarnings("unchecked")
+	public List<Recent> getRecents(){
+		List<Recent> recents = (List<Recent>) httpSession.getAttribute("recents");
+		return recents;
+	}
+	
+	public void removeRecent(Recent recent){
+		List<Recent> recents = getRecents();
+        recents.remove(recent);
+        httpSession.removeAttribute("recents");
+        httpSession.setAttribute("recents", recents);
+	}
+	
+	public List<Recent> getRecentsCheckinsFriends(String acessToken){
+		if (getRecents()!=null && !getRecents().isEmpty()) {
+			return getRecents();
+		}
+		List<Recent> recents =	getRecentsCheckins(acessToken);
+		httpSession.setAttribute("recents", recents);
+		return recents;
+	}
+	
+	public Recent findById(String recentId){
+		return getRecents().stream()
+				.filter(recent -> recent.getId().equals(recentId))
+				.findFirst().get();
+	}
+	
+	
 	public User getDetailsUser(String accessToken, String userId){
 		String uriUser = "https://api.foursquare.com/v2/users/"+userId;
 		User user = null;
@@ -50,6 +118,7 @@ public class WishlisterService {
 		}
 		return user;
 	}
+
 	
 	public List<Recent> getRecentsCheckins(String accessToken){
 		List<Recent> recents = new ArrayList<>();
