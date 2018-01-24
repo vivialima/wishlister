@@ -15,13 +15,6 @@ public class LoginController {
 		return "login";
 	}
 	
-
-//	@RequestMapping("/")
-//	public String logout(){
-//		return "login";
-//	}
-//	
-	
 	@RequestMapping("/redirect")
 	public String redirectFoursquareLogin(){
 		return authenticationService.login();

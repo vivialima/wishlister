@@ -23,7 +23,7 @@ public class WishlisterController {
 	private HttpSession httpSession;
 	
 	@RequestMapping("wishlister")
-	public String getAuthenticateCode(@RequestParam("code") String codeAuthentication, Model model){		
+	public String getAuthenticationCode(@RequestParam("code") String codeAuthentication, Model model){		
 		model.addAttribute(getUser(codeAuthentication));		
 		model.addAttribute("recents",wishlisterService.getRecentsCheckinsFriends(authenticationService.getAcessToken(codeAuthentication)));
 		model.addAttribute("wishlist", wishlisterService.getWishlist());
